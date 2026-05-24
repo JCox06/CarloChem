@@ -1,0 +1,73 @@
+#include <glad/glad.h>
+#include "CVFramework.h"
+#include <GLFW/glfw3.h>
+#include <stdbool.h>
+#include <stdio.h>
+
+
+static bool prepareGLFW() {
+
+    bool status = glfwInit();
+
+    glfwDefaultWindowHints();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+
+    return status;
+}
+
+
+bool cvInit(struct CVEngine *engine, const char *name, int width, int height) {
+    
+    bool status = prepareGLFW();
+
+    if (status == false) {
+        printf("Could not initialise GLFW\n");
+        return false;
+    }
+    
+    engine->mainWindow = glfwCreateWindow(width, height, name, NULL, NULL);
+
+    if (!engine->mainWindow) {
+        cvShutdown(engine);
+        printf("Could not create main engine GLFW window\n");
+        return false;
+    }
+
+    glfwMakeContextCurrent(engine->mainWindow);
+
+
+    int version = gladLoadGL();
+    if (version == 0) {
+        printf("Failed to initialise OpenGL functions \n");
+        return false;
+    }
+
+    glClearColor(0.11f, 0.11f, 0.11f, 1.0f);
+
+    printf("Success! GLFW and OpenGL context created\n");
+    return true;
+}
+
+void cvShutdown() {
+    printf("CVEngine is Shutting down \n");
+    glfwTerminate();
+}
+
+bool cvKeepOpen(struct CVEngine *engine) {
+    return !glfwWindowShouldClose(engine->mainWindow);
+}
+
+
+void cvUpdate(struct CVEngine *engine) {
+    glfwSwapBuffers(engine->mainWindow);
+    glfwPollEvents();
+}
+
+
+void cvWindowMetrics(struct CVEngine *engine, int *metricX, int *metricY) {
+    glfwGetFramebufferSize(engine->mainWindow, metricX, metricY);
+}
+
+
