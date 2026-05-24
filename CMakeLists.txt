@@ -30,7 +30,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(cglm)
 
-add_executable(CarloChem src/main.c src/CVFramework.c src/CVIO.c src/CVShader.c src/CVShapes.c)
+add_executable(CarloChem src/main.c src/CVFramework.c src/CVIO.c src/CVShader.c src/CVRender.c src/CarloChem.c)
 
 add_library(glad lib/glad/src/glad.c)
 target_include_directories(glad PUBLIC lib/glad/include)
