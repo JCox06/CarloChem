@@ -12,12 +12,12 @@ struct CVShaderProgram {
     GLint geometryID;
 };
 
-
-void cvLoadShader(struct CVShaderProgram *program, const char *vertexSrc, const char* fragSrc, const char* geomSrc);
-
-void cvDeleteShader(struct CVShaderProgram *program);
-
 void cvSetFloatMatrix(struct CVShaderProgram *program, const char *name, mat4 matrix);
+
+void cvSetFloatVector(struct CVShaderProgram *program, const char *name, vec4 vector);
+
+void cvSetFloatVector3(struct CVShaderProgram *program, const char *name, vec3 vector);
+
 
 void cvSetInteger(struct CVShaderProgram *program, const char *name, int integer);
 

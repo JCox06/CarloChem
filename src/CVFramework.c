@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include "CVResources.h"
 
 
 static bool prepareGLFW() {
@@ -47,11 +48,20 @@ bool cvInit(struct CVEngine *engine, const char *name, int width, int height) {
     glClearColor(0.11f, 0.11f, 0.11f, 1.0f);
 
     printf("Success! GLFW and OpenGL context created\n");
+
+    struct CVResources res;
+    cvInitResources(&res);
+    engine->resources = res;
+
+    engine->lastFrameTime = 0.0f;
+    engine->deltaTime = 0.0f;
+
     return true;
 }
 
-void cvShutdown() {
+void cvShutdown(struct CVEngine *engine) {
     printf("CVEngine is Shutting down \n");
+    cvShutdownResources(&(engine->resources));
     glfwTerminate();
 }
 
@@ -63,6 +73,11 @@ bool cvKeepOpen(struct CVEngine *engine) {
 void cvUpdate(struct CVEngine *engine) {
     glfwSwapBuffers(engine->mainWindow);
     glfwPollEvents();
+
+    //Calculate the delta time
+    float currentTime = cvRunningTime();
+    engine->deltaTime = currentTime - engine->lastFrameTime;
+    engine->lastFrameTime = currentTime;
 }
 
 
@@ -70,4 +85,11 @@ void cvWindowMetrics(struct CVEngine *engine, int *metricX, int *metricY) {
     glfwGetFramebufferSize(engine->mainWindow, metricX, metricY);
 }
 
+float cvRunningTime() {
+    return (float) glfwGetTime();
+}
 
+
+bool cvKeyDown(struct CVEngine *engine, int key) {
+    return glfwGetKey(engine->mainWindow, key) == GLFW_PRESS;
+}

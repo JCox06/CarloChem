@@ -11,7 +11,7 @@ uniform bool uIgnoreTextures = false;
 
 void main() {
     if (uIgnoreTextures) {
-        colour = (vec4(1.0f, 1.0f, 1.0f, 1.0f));
+        colour = vec4(uLight, 1.0f);
     } else {
         colour = (texture(uTexture0, lTexCoord)) * (vec4(uLight, 1.0f));
     }

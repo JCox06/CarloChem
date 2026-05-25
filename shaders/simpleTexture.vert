@@ -16,7 +16,6 @@ void main() {
 
     float newScale = max(1, aScaleMod);
     vec4 newPos = vec4((aPos + aPosMod) * newScale, 1.0f);
-    //gl_Position = uPerspective  * uModel * newPos;
-    gl_Position = vec4(aPos, 1.0f);
+    gl_Position = uPerspective  * uModel * newPos;
     lTexCoord = aTex;
 }
