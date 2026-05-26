@@ -78,6 +78,14 @@ void cvUpdate(struct CVEngine *engine) {
     float currentTime = cvRunningTime();
     engine->deltaTime = currentTime - engine->lastFrameTime;
     engine->lastFrameTime = currentTime;
+
+    //Calculate the delta mouse
+    double xCurrentPos, yCurrentPos;
+    glfwGetCursorPos(engine->mainWindow, &xCurrentPos, &yCurrentPos);
+    engine->deltaMouseX = (float) xCurrentPos - engine->lastMouseX;
+    engine->deltaMouseY = -(float) yCurrentPos + engine->lastMouseY; //GLFW coordinates run backwards
+    engine->lastMouseX = (float) xCurrentPos;
+    engine->lastMouseY = (float) yCurrentPos;
 }
 
 
@@ -92,4 +100,13 @@ float cvRunningTime() {
 
 bool cvKeyDown(struct CVEngine *engine, int key) {
     return glfwGetKey(engine->mainWindow, key) == GLFW_PRESS;
+}
+
+void cvLockMouseInWindow(struct CVEngine *engine, bool flag) {
+    if (flag) {
+        glfwSetInputMode(engine->mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    if (!flag) {
+                glfwSetInputMode(engine->mainWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
 }

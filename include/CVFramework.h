@@ -12,6 +12,11 @@ struct CVEngine {
     struct CVResources resources;
     float lastFrameTime;
     float deltaTime;
+
+    float lastMouseX;
+    float lastMouseY;
+    float deltaMouseX;
+    float deltaMouseY;
 };
 
 
@@ -22,4 +27,5 @@ void cvUpdate(struct CVEngine *engine);
 void cvWindowMetrics(struct CVEngine *engine, int *metricX, int *metricY);
 float cvRunningTime();
 bool cvKeyDown(struct CVEngine *engine, int key);
+void cvLockMouseInWindow(struct CVEngine *engine, bool flag);
 #endif

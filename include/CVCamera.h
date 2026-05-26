@@ -6,7 +6,12 @@
 struct CVCamera {
     vec3 worldPosition;
     vec3 direction;
+    vec3 rightVector;
     vec3 upVector;
+
+    //Pitch - Up/Down rotation; Yaw - Left/Right rotation;
+    float pitch;
+    float yaw;
 
     float fov;
 

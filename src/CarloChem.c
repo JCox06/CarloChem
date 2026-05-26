@@ -13,6 +13,7 @@
 #define SQUARE_MESH 0
 
 #define WALK_SPEED 0.5f
+#define MOUSE_SENSE 2.0f;
 
 static void loadAssets(struct CVEngine *engine) {
 
@@ -57,21 +58,63 @@ static void onRenderLoop(struct CVEngine *engine, struct CCState *state) {
 }
 
 
-static void onUpdateLoop(struct CVEngine *engine, struct CCState *state) {
-   float dt = engine->deltaTime;
-   vec3 norm;
-   glm_vec3_copy(state->camera.direction, norm);
-   glm_vec3_norm(norm);
-   glm_vec3_scale(norm, WALK_SPEED, norm);
 
+static void handleKeyboardCameraMovement(struct CVEngine *engine, struct CCState *state) {
+   float moveScale = engine->deltaTime * WALK_SPEED;
+   vec3 movementVector;
+   glm_vec3_zero(movementVector);
    if (cvKeyDown(engine, GLFW_KEY_W)) {
-      glm_vec3_add(state->camera.worldPosition, norm , state->camera.worldPosition);
+      glm_vec3_scale(state->camera.direction, moveScale, movementVector);
+      glm_vec3_add(state->camera.worldPosition, movementVector , state->camera.worldPosition);
    }
    if (cvKeyDown(engine, GLFW_KEY_S)) {
-      glm_vec3_negate(norm);
-      glm_vec3_add(state->camera.worldPosition, norm , state->camera.worldPosition);
+      glm_vec3_scale(state->camera.direction, -moveScale, movementVector);
+      glm_vec3_add(state->camera.worldPosition, movementVector , state->camera.worldPosition);
+   }
+
+   if (cvKeyDown(engine, GLFW_KEY_D)) {
+      glm_vec3_scale(state->camera.rightVector, moveScale, movementVector);
+      glm_vec3_add(state->camera.worldPosition, movementVector , state->camera.worldPosition);
+   }
+   if (cvKeyDown(engine, GLFW_KEY_A)) {
+      glm_vec3_scale(state->camera.rightVector, -moveScale, movementVector);
+      glm_vec3_add(state->camera.worldPosition, movementVector , state->camera.worldPosition);
+   }
+   if (cvKeyDown(engine, GLFW_KEY_SPACE)) {
+      glm_vec3_scale(state->camera.upVector, moveScale, movementVector);
+      glm_vec3_add(state->camera.worldPosition, movementVector , state->camera.worldPosition);
+   }
+   if (cvKeyDown(engine, GLFW_KEY_LEFT_SHIFT)) {
+      glm_vec3_scale(state->camera.upVector, -moveScale, movementVector);
+      glm_vec3_add(state->camera.worldPosition, movementVector , state->camera.worldPosition);
+   }
+  
+}
+
+
+static void handleMouseCameraMovement(struct CVEngine *engine, struct CCState *state) {
+      float deltaX = engine->deltaMouseX;
+      float deltaY = engine->deltaMouseY;
+
+      float sense = engine->deltaTime * MOUSE_SENSE;
+
+      state->camera.yaw += deltaX * sense;
+      state->camera.pitch += deltaY * sense;
+}
+
+static void onUpdateLoop(struct CVEngine *engine, struct CCState *state) {
+   handleKeyboardCameraMovement(engine, state);
+   handleMouseCameraMovement(engine, state);
+   if (cvKeyDown(engine, GLFW_KEY_L)) {
+      cvLockMouseInWindow(engine, true);
+   }
+   if (cvKeyDown(engine, GLFW_KEY_K)) {
+            cvLockMouseInWindow(engine, false);
+
    }
 }
+
+
 
 
 void startCarloChem() {
