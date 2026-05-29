@@ -46,6 +46,9 @@ void cvCameraUpdate(struct CVCamera *camera, float aspectRatio) {
     glm_vec3_cross(camera->direction, camera->upVector, camera->rightVector);
     glm_vec3_norm(camera->direction);
     glm_vec3_norm(camera->rightVector);
+
+
+
 }
 
 

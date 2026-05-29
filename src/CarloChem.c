@@ -12,6 +12,8 @@
 #define SIMPLE_SHADER 0
 #define SQUARE_MESH 0
 
+#define SPHERE_MESH 1
+
 #define WALK_SPEED 0.5f
 #define MOUSE_SENSE 2.0f;
 
@@ -22,7 +24,7 @@ static void loadAssets(struct CVEngine *engine) {
    //Shader Loading
    char* vertexSrc = cvReadString("shaders/simpleTexture.vert");
    char* fragSrc = cvReadString("shaders/simpleTexture.frag");
-   int id = cvLoadShader(resources, vertexSrc, fragSrc, NULL);
+   int id = cvLoadShader(resources, vertexSrc, fragSrc, NULL);\
    printf("Loaded simple shader with id of %i\n", id);
    free(vertexSrc);
    free(fragSrc);
@@ -32,6 +34,12 @@ static void loadAssets(struct CVEngine *engine) {
    cvCreateRectangleMesh(&mesh, -0.5f, -0.5f, 1.0f, 1.0f);
    cvCreateVertexArray(resources, &mesh);
    cvDeleteMesh(&mesh);
+
+   //Load the circle mesh
+   struct CVMesh circleMesh;
+   cvCreateSphereMesh(&circleMesh, 0.0f, 0.0f, 0.0f, 1, 250, 250);
+   cvCreateVertexArray(resources, &circleMesh);
+   cvDeleteMesh(&circleMesh);
 }
 
 
@@ -52,7 +60,7 @@ static void onRenderLoop(struct CVEngine *engine, struct CCState *state) {
    cvSetFloatMatrix(program, "uModel", identity);
    cvSetInteger(program, "uIgnoreTextures", 1);
    cvSetFloatVector3(program, "uLight", light);
-   struct CVVertexArray *vertexArray = cvUseVertexArray(resources, SQUARE_MESH);
+   struct CVVertexArray *vertexArray = cvUseVertexArray(resources, SPHERE_MESH);
    glDrawElements(GL_TRIANGLES, vertexArray->vertices, GL_UNSIGNED_INT, 0);
 
 }
@@ -135,7 +143,7 @@ void startCarloChem() {
       glClear(GL_COLOR_BUFFER_BIT);
       cvWindowMetrics(&engine, &metricX, &metricY);
       glViewport(0, 0, metricX, metricY);
-      cvCameraUpdate(&(state.camera), metricX / metricY);
+      cvCameraUpdate(&(state.camera), metricX / (float) metricY);
 
       onUpdateLoop(&engine, &state);
       onRenderLoop(&engine, &state);

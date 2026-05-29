@@ -18,6 +18,8 @@ struct CVMesh {
 //For now - let a vertex contain just position (x, y, z, w);
 void cvCreateRectangleMesh(struct CVMesh *mesh, float x, float y, float dx, float dy);
 
+void cvCreateSphereMesh(struct CVMesh *mesh, float xPos, float yPos, float zPos, float radius, float quantTheta, float quantPhi);
+
 
 void cvDeleteMesh(struct CVMesh *mesh);
 
