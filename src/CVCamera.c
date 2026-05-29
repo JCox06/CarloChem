@@ -41,7 +41,7 @@ void cvCameraUpdate(struct CVCamera *camera, float aspectRatio) {
     vec3 at;
     glm_vec3_add(camera->direction, camera->worldPosition, at);
     glm_lookat(camera->worldPosition, at, camera->upVector, camera->view);
-    glm_perspective(glm_rad(camera->fov), aspectRatio, 0.1f, 100.0f, camera->perspective);
+    glm_perspective(glm_rad(camera->fov), aspectRatio, 0.1f, 1000.0f, camera->perspective);
     glm_mat4_mul(camera->perspective, camera->view, camera->project);
     glm_vec3_cross(camera->direction, camera->upVector, camera->rightVector);
     glm_vec3_norm(camera->direction);

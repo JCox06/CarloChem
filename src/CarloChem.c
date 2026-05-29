@@ -14,7 +14,7 @@
 
 #define SPHERE_MESH 1
 
-#define WALK_SPEED 0.5f
+#define WALK_SPEED 5.0f
 #define MOUSE_SENSE 2.0f;
 
 static void loadAssets(struct CVEngine *engine) {
@@ -37,7 +37,7 @@ static void loadAssets(struct CVEngine *engine) {
 
    //Load the circle mesh
    struct CVMesh circleMesh;
-   cvCreateSphereMesh(&circleMesh, 0.0f, 0.0f, 0.0f, 1, 250, 250);
+   cvCreateSphereMesh(&circleMesh, 0.0f, 0.0f, 0.0f, 1.0f, 250, 250);
    cvCreateVertexArray(resources, &circleMesh);
    cvDeleteMesh(&circleMesh);
 }
@@ -57,11 +57,19 @@ static void onRenderLoop(struct CVEngine *engine, struct CCState *state) {
 
    struct CVShaderProgram *program = cvUseProgram(resources, SIMPLE_SHADER);
    cvSetFloatMatrix(program, "uPerspective", state->camera.project);
-   cvSetFloatMatrix(program, "uModel", identity);
    cvSetInteger(program, "uIgnoreTextures", 1);
    cvSetFloatVector3(program, "uLight", light);
    struct CVVertexArray *vertexArray = cvUseVertexArray(resources, SPHERE_MESH);
-   glDrawElements(GL_TRIANGLES, vertexArray->vertices, GL_UNSIGNED_INT, 0);
+
+   for (int i = 0; i < 1000; i++) {
+      mat4 translation;
+      glm_mat4_identity(translation);
+      float *pos = state->positions[i];
+      glm_translate(translation, pos);
+      cvSetFloatMatrix(program, "uModel", translation);
+      glDrawElements(GL_TRIANGLES, vertexArray->vertices, GL_UNSIGNED_INT, 0);
+   }
+
 
 }
 
@@ -135,6 +143,20 @@ void startCarloChem() {
 
    struct CCState state;
    cvCameraInit(&(state.camera), 0.0f, 0.0f, 3.0f, 0.0f, 0.0f, -1.0f);
+
+
+
+    //Init the Positions of spheres
+   for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+         for (int k = 0; k < 10; k++) {
+            int index = i * 100 + j * 10 + k;
+            state.positions[index][0] = i * 2.5f;
+            state.positions[index][1] = j * 2.5f;        
+            state.positions[index][2] = k * 2.5f;        
+         }
+      }
+   }
 
 
    int metricX, metricY;

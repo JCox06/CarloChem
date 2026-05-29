@@ -34,10 +34,9 @@ void cvCreateRectangleMesh(struct CVMesh *mesh, float x, float y, float dx, floa
 }
 
 static void calculateCartesian(float radius, float theta, float phi, float *x, float *y, float *z) {
-    //Essentially polar coordinates
-    *x = radius * sinf(theta) * cosf(phi);
-    *y = radius * sinf(theta) * sinf(phi);
-    *z = radius * cosf(theta);
+    *x = radius * sinf(phi) * cosf(theta);
+    *y = radius * sinf(phi) * sinf(theta);
+    *z = radius * cosf(phi);
 }
 
 
