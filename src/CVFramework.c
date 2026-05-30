@@ -56,12 +56,18 @@ bool cvInit(struct CVEngine *engine, const char *name, int width, int height) {
     engine->lastFrameTime = 0.0f;
     engine->deltaTime = 0.0f;
 
+
+    struct CVInstanceRenderer instancer;
+    cvInstanceRendererInit(&instancer);
+    engine->instancer = instancer;
+
     return true;
 }
 
 void cvShutdown(struct CVEngine *engine) {
     printf("CVEngine is Shutting down \n");
     cvShutdownResources(&(engine->resources));
+    cvInstanceRendererDestory(&(engine->instancer));
     glfwTerminate();
 }
 

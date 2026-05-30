@@ -5,6 +5,7 @@
 #include "CVIO.h"
 #include "CVMesh.h"
 #include "CVCamera.h"
+#include "CVInstanceRenderer.h"
 #include <GLFW/glfw3.h>
 
 
@@ -32,13 +33,13 @@ static void loadAssets(struct CVEngine *engine) {
    //Test Mesh
    struct CVMesh mesh;
    cvCreateRectangleMesh(&mesh, -0.5f, -0.5f, 1.0f, 1.0f);
-   cvCreateVertexArray(resources, &mesh);
+   cvCreateVertexArray(resources, NULL, &mesh, GL_TRIANGLES);
    cvDeleteMesh(&mesh);
 
    //Load the circle mesh
    struct CVMesh circleMesh;
    cvCreateSphereMesh(&circleMesh, 0.0f, 0.0f, 0.0f, 1.0f, 250, 250);
-   cvCreateVertexArray(resources, &circleMesh);
+   cvCreateVertexArray(resources, &(engine->instancer), &circleMesh, GL_TRIANGLES);
    cvDeleteMesh(&circleMesh);
 }
 
@@ -61,16 +62,30 @@ static void onRenderLoop(struct CVEngine *engine, struct CCState *state) {
    cvSetFloatVector3(program, "uLight", light);
    struct CVVertexArray *vertexArray = cvUseVertexArray(resources, SPHERE_MESH);
 
+
+   // for (int i = 0; i < 1000; i++) {
+   //    mat4 translation;
+   //    glm_mat4_identity(translation);
+   //    float *pos = state->positions[i];
+   //    glm_translate(translation, pos);
+   //    cvSetFloatMatrix(program, "uModel", translation);
+   //    glDrawElements(vertexArray->primitiveMode, vertexArray->vertices, GL_UNSIGNED_INT, 0);
+   // }
+
+
+
+   float positions[3000];
    for (int i = 0; i < 1000; i++) {
-      mat4 translation;
-      glm_mat4_identity(translation);
+      int currentIndex = i;
       float *pos = state->positions[i];
-      glm_translate(translation, pos);
-      cvSetFloatMatrix(program, "uModel", translation);
-      glDrawElements(GL_TRIANGLES, vertexArray->vertices, GL_UNSIGNED_INT, 0);
+      positions[currentIndex++] = pos[0];
+      positions[currentIndex++] = pos[1];
+      positions[currentIndex++] = pos[2];
    }
-
-
+   mat4 translation;
+   glm_mat4_identity(translation); 
+   cvSetFloatMatrix(program, "uModel", translation);
+   cvInstanceArray(&(engine->instancer), vertexArray, positions, 3000);
 }
 
 

@@ -28,6 +28,7 @@ struct CVVertexArray {
     GLint vertexBuffer;
     GLint indexBuffer;
     int vertices;
+    int primitiveMode;
 };
 
 #endif

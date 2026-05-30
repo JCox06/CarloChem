@@ -3,6 +3,7 @@
 
 #include "CVShader.h"
 #include "CVMesh.h"
+#include "CVInstanceRenderer.h"
 
 #define MAX_PROGRAMS 5
 #define MAX_VERTEX_ARRAYS 5
@@ -28,7 +29,7 @@ struct CVShaderProgram* cvUseProgram(struct CVResources *resources, int programN
 
 
 //Returns the ID of the VAO to be created
-int cvCreateVertexArray(struct CVResources *resources, const struct CVMesh *mesh);
+int cvCreateVertexArray(struct CVResources *resources, struct CVInstanceRenderer *instancer, const struct CVMesh *mesh, int primitiveMode);
 
 void cvDeleteVertexArray(struct CVResources *resources, int arrayName);
 

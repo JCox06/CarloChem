@@ -132,7 +132,7 @@ struct CVShaderProgram* cvUseProgram(struct CVResources *resources, int programN
     return program;
 }
 
-int cvCreateVertexArray(struct CVResources *resources, const struct CVMesh *mesh) {
+int cvCreateVertexArray(struct CVResources *resources, struct CVInstanceRenderer *instancer, const struct CVMesh *mesh, int primitiveMode){
     struct CVVertexArray array;
 
        //Create the vertex Array
@@ -149,7 +149,17 @@ int cvCreateVertexArray(struct CVResources *resources, const struct CVMesh *mesh
    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->indexCount * sizeof(unsigned int), mesh->indices, GL_STATIC_DRAW);
 
    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-   glEnableVertexAttribArray(0);
+
+   //Reserve 1 for texture coordinates
+
+    //Slot 2 is for instance coordinates
+
+    if (instancer != NULL) {
+        cvBindInstanceToVertexArray(instancer);
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(2);
+        glVertexAttribDivisor(2, 1);
+    }
 
    //vertex_count is a helpful property that stores the size of the buffer
    //Since OpenGL wants the number of vertices, and each vertex has a position, (and may) have a texture coordinate
@@ -159,7 +169,8 @@ int cvCreateVertexArray(struct CVResources *resources, const struct CVMesh *mesh
    array.vertexArray = vertexArray;
    array.vertexBuffer = vertexBuffer;
    array.indexBuffer = indexBuffer;
-
+   array.primitiveMode = primitiveMode;
+    glEnableVertexAttribArray(0);
    return addVertexArray(resources, array);
 }
 

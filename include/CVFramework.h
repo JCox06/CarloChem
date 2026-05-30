@@ -6,10 +6,12 @@
 #include <GLFW/glfw3.h>
 #include <stdbool.h>
 #include "CVResources.h"
+#include "CVInstanceRenderer.h"
 
 struct CVEngine {
     GLFWwindow *mainWindow;
     struct CVResources resources;
+    struct CVInstanceRenderer instancer;
     float lastFrameTime;
     float deltaTime;
 
