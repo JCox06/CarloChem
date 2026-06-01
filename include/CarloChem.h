@@ -4,13 +4,16 @@
 
 #include "CVCamera.h"
 #include <cglm/cglm.h>
+#include "CCSimulation.h"
 
 void startCarloChem();
 
 
+
+
 struct CCState {
     struct CVCamera camera;
-    vec3 positions[1000];
+    struct CCSimulation simulation;
 };
 
 #endif

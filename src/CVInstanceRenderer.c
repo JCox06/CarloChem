@@ -7,6 +7,8 @@
 void cvInstanceRendererInit(struct CVInstanceRenderer *render) {
     glBindVertexArray(0);
     glGenBuffers(1, &(render->sharedVertexBuffer));
+
+    
     glBindBuffer(GL_ARRAY_BUFFER, render->sharedVertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, (SHARED_INSTANCE_SIZE * sizeof(float)), NULL, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

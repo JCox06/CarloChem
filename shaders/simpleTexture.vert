@@ -5,16 +5,22 @@ layout (location = 1) in vec2 aTex;
 
 //Vertex Attributes from the instance
 layout (location = 2) in vec3 aPosMod;
-layout (location = 3) in float aScaleMod;
+layout (location = 3) in float aCharge;
+layout (location = 4) in float aScaleMod;
+
 
 out vec2 lTexCoord;
+
+out float lChargeE;
 
 uniform mat4 uPerspective;
 uniform mat4 uModel;
 
 void main() {
 
-    float newScale = max(1, aScaleMod);
+    lChargeE = aCharge;
+
+    float newScale = max(1.0f, aScaleMod);
     vec4 newPos = vec4((aPos + aPosMod) * newScale, 1.0f);
     gl_Position = uPerspective  * uModel * newPos;
     lTexCoord = aTex;

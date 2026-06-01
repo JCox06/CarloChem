@@ -14,6 +14,7 @@ static bool prepareGLFW() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     return status;
 }
@@ -46,6 +47,8 @@ bool cvInit(struct CVEngine *engine, const char *name, int width, int height) {
     }
 
     glClearColor(0.11f, 0.11f, 0.11f, 1.0f);
+    glEnable(GL_MULTISAMPLE); 
+    glEnable(GL_DEPTH_TEST);
 
     printf("Success! GLFW and OpenGL context created\n");
 

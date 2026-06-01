@@ -1,7 +1,7 @@
 #include "CVMesh.h"
 #include <math.h>
 
-#define PI 3.14
+#define PI 3.14159
 
 static void setData(float *vertices, int index, float x, float y, float z) {
     

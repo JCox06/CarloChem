@@ -54,7 +54,9 @@ static GLint compileShader(const char *shaderSource, int type) {
     glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(shaderID, 512, NULL, infoLog);
-        printf("ERROR - Shader Compilation Failed\n");
+        printf("=======================\n");
+        printf("ERROR - Shader Compilation Failed\n%s\n", infoLog);
+        printf("=======================\n");
     } else {
         printf("Shader compilation successful\n");
     }
@@ -156,9 +158,19 @@ int cvCreateVertexArray(struct CVResources *resources, struct CVInstanceRenderer
 
     if (instancer != NULL) {
         cvBindInstanceToVertexArray(instancer);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(2);
         glVertexAttribDivisor(2, 1);
+
+        //For the time being, allow charges and radii to be placed into this buffer
+        //The shader will then decide on the colour based on the charge, and directly scale the atom
+        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(3);
+        glVertexAttribDivisor(3, 1);
+
+        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(4 * sizeof(float)));
+        glEnableVertexAttribArray(4);
+        glVertexAttribDivisor(4, 1);
     }
 
    //vertex_count is a helpful property that stores the size of the buffer

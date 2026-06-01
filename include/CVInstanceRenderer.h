@@ -9,9 +9,9 @@
 #define SHARED_INSTANCE_SIZE 5000
 
 //Every mesh in this OpenGL framework has a fixed vertex layout
-//the instancer currently only passes in 3 floats (x, y, z) position offset
-//Therefore the number of OpenGl mappings is 3
-#define OPENGL_MAPPINGS 3
+//the instancer currently only passes in 3 floats (x, y, z) position offset, particle charge, and particle size
+//Therefore the number of OpenGl mappings is 5
+#define OPENGL_MAPPINGS 5 
 
 
 struct CVInstanceRenderer {

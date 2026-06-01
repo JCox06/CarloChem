@@ -7,6 +7,7 @@
 #include "CVCamera.h"
 #include "CVInstanceRenderer.h"
 #include <GLFW/glfw3.h>
+#include <time.h>
 
 
 //IDs for the OpenGL objects
@@ -38,9 +39,24 @@ static void loadAssets(struct CVEngine *engine) {
 
    //Load the circle mesh
    struct CVMesh circleMesh;
-   cvCreateSphereMesh(&circleMesh, 0.0f, 0.0f, 0.0f, 1.0f, 250, 250);
+   cvCreateSphereMesh(&circleMesh, 0.0f, 0.0f, 0.0f, 1.0f, 300, 150);
    cvCreateVertexArray(resources, &(engine->instancer), &circleMesh, GL_TRIANGLES);
    cvDeleteMesh(&circleMesh);
+}
+
+
+static void populateBulkyArray(struct CCState *state) {
+   int positionIndex = 0;
+   int chargeIndex = 0;
+   int radiusIndex = 0;
+   for (int i = 0; i < state->simulation.particleCount * 5;) {
+      state->simulation.bulkyArray[i++] = state->simulation.positions[positionIndex++];
+      state->simulation.bulkyArray[i++] = state->simulation.positions[positionIndex++];
+      state->simulation.bulkyArray[i++] = state->simulation.positions[positionIndex++];
+
+      state->simulation.bulkyArray[i++] = state->simulation.charges[chargeIndex++];
+      state->simulation.bulkyArray[i++] = state->simulation.radii[radiusIndex++];
+   }
 }
 
 
@@ -52,9 +68,7 @@ static void onRenderLoop(struct CVEngine *engine, struct CCState *state) {
    glm_mat4_identity(identity);
 
    vec3 light;
-   light[0] = (float) sin(cvRunningTime());
-   light[1] = 1.0f;
-   light[2] = 1.0f;
+   glm_vec3_one(light);
 
    struct CVShaderProgram *program = cvUseProgram(resources, SIMPLE_SHADER);
    cvSetFloatMatrix(program, "uPerspective", state->camera.project);
@@ -63,29 +77,11 @@ static void onRenderLoop(struct CVEngine *engine, struct CCState *state) {
    struct CVVertexArray *vertexArray = cvUseVertexArray(resources, SPHERE_MESH);
 
 
-   // for (int i = 0; i < 1000; i++) {
-   //    mat4 translation;
-   //    glm_mat4_identity(translation);
-   //    float *pos = state->positions[i];
-   //    glm_translate(translation, pos);
-   //    cvSetFloatMatrix(program, "uModel", translation);
-   //    glDrawElements(vertexArray->primitiveMode, vertexArray->vertices, GL_UNSIGNED_INT, 0);
-   // }
+   cvSetFloatMatrix(program, "uModel", identity);
+   populateBulkyArray(state);
+   
 
-
-
-   float positions[3000];
-   for (int i = 0; i < 1000; i++) {
-      int currentIndex = i;
-      float *pos = state->positions[i];
-      positions[currentIndex++] = pos[0];
-      positions[currentIndex++] = pos[1];
-      positions[currentIndex++] = pos[2];
-   }
-   mat4 translation;
-   glm_mat4_identity(translation); 
-   cvSetFloatMatrix(program, "uModel", translation);
-   cvInstanceArray(&(engine->instancer), vertexArray, positions, 3000);
+   cvInstanceArray(&(engine->instancer), vertexArray, state->simulation.bulkyArray, state->simulation.particleCount * 5);
 }
 
 
@@ -119,7 +115,13 @@ static void handleKeyboardCameraMovement(struct CVEngine *engine, struct CCState
       glm_vec3_scale(state->camera.upVector, -moveScale, movementVector);
       glm_vec3_add(state->camera.worldPosition, movementVector , state->camera.worldPosition);
    }
-  
+   if (cvKeyDown(engine, GLFW_KEY_L)) {
+      cvLockMouseInWindow(engine, true);
+   }
+   if (cvKeyDown(engine, GLFW_KEY_K)) {
+            cvLockMouseInWindow(engine, false);
+
+   }
 }
 
 
@@ -133,20 +135,22 @@ static void handleMouseCameraMovement(struct CVEngine *engine, struct CCState *s
       state->camera.pitch += deltaY * sense;
 }
 
+
+static void handleSimUpdates(struct CCState *state) {
+   ccUpdateSimulation(&(state->simulation));
+
+   double energy = state->simulation.lastPotentialEnergy;
+
+   // printf("Total Interaction Energy: %e J \n", energy);
+   printf("Total Molar Interaction Energy %f kJ/mol \n", ccCalculateStandardMolarEnergy(energy));
+}
+
 static void onUpdateLoop(struct CVEngine *engine, struct CCState *state) {
    handleKeyboardCameraMovement(engine, state);
    handleMouseCameraMovement(engine, state);
-   if (cvKeyDown(engine, GLFW_KEY_L)) {
-      cvLockMouseInWindow(engine, true);
-   }
-   if (cvKeyDown(engine, GLFW_KEY_K)) {
-            cvLockMouseInWindow(engine, false);
-
-   }
+   
+   handleSimUpdates(state);
 }
-
-
-
 
 void startCarloChem() {
    struct CVEngine engine;
@@ -159,25 +163,16 @@ void startCarloChem() {
    struct CCState state;
    cvCameraInit(&(state.camera), 0.0f, 0.0f, 3.0f, 0.0f, 0.0f, -1.0f);
 
-
-
-    //Init the Positions of spheres
-   for (int i = 0; i < 10; i++) {
-      for (int j = 0; j < 10; j++) {
-         for (int k = 0; k < 10; k++) {
-            int index = i * 100 + j * 10 + k;
-            state.positions[index][0] = i * 2.5f;
-            state.positions[index][1] = j * 2.5f;        
-            state.positions[index][2] = k * 2.5f;        
-         }
-      }
-   }
-
+   //Set simulation type
+   ccSetSimpleIonic(&(state.simulation), 1, 50, 1, -1, 50, 1);
+   ccAlignParticlesToLine(&(state.simulation));
 
    int metricX, metricY;
 
+   srand(time(0));
+
    while (cvKeepOpen(&engine)) {
-      glClear(GL_COLOR_BUFFER_BIT);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       cvWindowMetrics(&engine, &metricX, &metricY);
       glViewport(0, 0, metricX, metricY);
       cvCameraUpdate(&(state.camera), metricX / (float) metricY);
@@ -188,7 +183,6 @@ void startCarloChem() {
       cvUpdate(&engine);
    }
 
+   ccDestorySimulation(&state.simulation);
    cvShutdown(&engine);
 }
-
-
