@@ -39,6 +39,7 @@ bool cvInit(struct CVEngine *engine, const char *name, int width, int height) {
 
     glfwMakeContextCurrent(engine->mainWindow);
 
+    glfwSwapInterval(0);
 
     int version = gladLoadGL();
     if (version == 0) {

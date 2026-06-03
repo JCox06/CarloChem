@@ -39,7 +39,7 @@ static void loadAssets(struct CVEngine *engine) {
 
    //Load the circle mesh
    struct CVMesh circleMesh;
-   cvCreateSphereMesh(&circleMesh, 0.0f, 0.0f, 0.0f, 1.0f, 300, 150);
+   cvCreateSphereMesh(&circleMesh, 0.0f, 0.0f, 0.0f, 1.0, 300, 300);
    cvCreateVertexArray(resources, &(engine->instancer), &circleMesh, GL_TRIANGLES);
    cvDeleteMesh(&circleMesh);
 }
@@ -139,10 +139,8 @@ static void handleMouseCameraMovement(struct CVEngine *engine, struct CCState *s
 static void handleSimUpdates(struct CCState *state) {
    ccUpdateSimulation(&(state->simulation));
 
-   double energy = state->simulation.lastPotentialEnergy;
-
    // printf("Total Interaction Energy: %e J \n", energy);
-   printf("Total Molar Interaction Energy %f kJ/mol \n", ccCalculateStandardMolarEnergy(energy));
+   printf("Total Molar Interaction Energy %f kJ/mol \n", ccCalculateStandardMolarEnergy(&(state->simulation)));
 }
 
 static void onUpdateLoop(struct CVEngine *engine, struct CCState *state) {
@@ -164,7 +162,8 @@ void startCarloChem() {
    cvCameraInit(&(state.camera), 0.0f, 0.0f, 3.0f, 0.0f, 0.0f, -1.0f);
 
    //Set simulation type
-   ccSetSimpleIonic(&(state.simulation), 1, 50, 1, -1, 50, 1);
+   //The depth of the potential well at the moment is just a random number
+   ccSetSimpleIonic(&(state.simulation), 1, 150, 1, -150, 1, 15);
    ccAlignParticlesToLine(&(state.simulation));
 
    int metricX, metricY;

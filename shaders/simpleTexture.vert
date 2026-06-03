@@ -20,8 +20,9 @@ void main() {
 
     lChargeE = aCharge;
 
-    float newScale = max(1.0f, aScaleMod);
-    vec4 newPos = vec4((aPos + aPosMod) * newScale, 1.0f);
+    float scale = aScaleMod;
+    
+    vec4 newPos = vec4((aPos * scale) + aPosMod, 1.0f);
     gl_Position = uPerspective  * uModel * newPos;
     lTexCoord = aTex;
 }

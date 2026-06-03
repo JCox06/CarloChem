@@ -12,17 +12,18 @@ static void createStorageArrays(struct CCSimulation *sim, int particles) {
     sim->bulkyArray = (float*)malloc(particles * 5 * sizeof(float));
 }
 
+//aSize and bSize should refer to the LJ colission parameter
 void ccSetSimpleIonic(struct CCSimulation *sim, float aCharge, int aCount, float aSize, float bCharge, int bCount, float bSize) {
     createStorageArrays(sim, aCount + bCount);
     //Leave the positions at zero, the Monte Carlo algorithm will move them anyway
     //Set charges
     for (int i = 0; i < aCount; i++) {
         sim->charges[i] = aCharge;
-        sim->radii[i] = aSize;
+        sim->radii[i] = aSize /2.0f;
     }
     for (int i = aCount; i < (sim->particleCount); i++) {
         sim->charges[i] = bCharge;
-        sim->radii[i] = bSize;
+        sim->radii[i] = bSize /2.0f;
     }
     sim->lastPotentialEnergy = 0.0;
     sim->thermodynamicTemperature = ROOM_TEMP;
@@ -33,7 +34,7 @@ void ccSetSimpleIonic(struct CCSimulation *sim, float aCharge, int aCount, float
 void ccAlignParticlesToLine(struct CCSimulation *sim) {
     for (int i = 0; i < sim->particleCount * 3;) {
         sim->positions[i++] = 0;
-        sim->positions[i++] = i;
+        sim->positions[i++] = i * 0.005f;
         sim->positions[i++] = 0;
     }
 }
@@ -57,15 +58,8 @@ void getParticlePos(struct CCSimulation *sim, int particleIndex, float* pos) {
 }
 
 
-static double calculateCoulombicPotential(struct CCSimulation *sim, int particleAIndex, int particleBIndex) {
-    vec3 particleAPos;
-    vec3 particleBPos;
-    getParticlePos(sim, particleAIndex, particleAPos);
-    getParticlePos(sim, particleBIndex, particleBPos);
-
-    double particleDistance = (double)glm_vec3_distance(particleAPos, particleBPos); //In Angstroms
-
-    particleDistance = particleDistance / (powf(10, 10)); //Now in metres
+static double calculateCoulombicPotential(struct CCSimulation *sim, int particleAIndex, int particleBIndex, double particleDistance) {
+    
 
 
     float aCharge = sim->charges[particleAIndex];
@@ -76,6 +70,22 @@ static double calculateCoulombicPotential(struct CCSimulation *sim, int particle
     return potential;
 }
 
+static double calculateLJPotential(struct CCSimulation *sim, int particleAIndex, int particleBIndex, double particleDistance) {
+
+    double aSize = sim->radii[particleAIndex];
+    double bSize = sim->radii[particleBIndex];
+    // double eqmDist = (aSize + bSize) * pow(10, -10); //From angstroms to metres
+    // double colissionParam = eqmDist / (pow(2, 1/6));
+    
+    double col = (aSize + bSize);
+    double colissionParam = col * pow(10, -10); //From angstroms to metres
+    
+    double wellDepth = 1 * pow(10, -10);
+
+    double LJPotential = 4 * wellDepth * (pow((colissionParam / particleDistance), (12)) - pow((colissionParam / particleDistance), (6)));
+    return LJPotential;
+}
+
 //By default, all params and worldspace is in Angstroms
 double ccCalculatePairwisePotential(struct CCSimulation *sim) {
     double totalInteraction = 0.0f;
@@ -83,10 +93,19 @@ double ccCalculatePairwisePotential(struct CCSimulation *sim) {
         for (int j = 0; j < sim->particleCount; j++) {
         //Only proceed if j is greater than i to avoid double counting the interaction
             if (j < i) {
-                double coulombic = calculateCoulombicPotential(sim, i, j);
+                vec3 particleAPos;
+                vec3 particleBPos;
+                getParticlePos(sim, i, particleAPos);
+                getParticlePos(sim, j, particleBPos);
+                double particleDistance = (double)glm_vec3_distance(particleAPos, particleBPos); //In Angstroms
+                particleDistance = particleDistance / (powf(10, 10)); //Now in metres
+
+
+                double coulombic = calculateCoulombicPotential(sim, i, j, particleDistance);
+                double LJPotential = calculateLJPotential(sim, i, j, particleDistance);
 
                 //Total interaction equal to coulombic, + LJ + etc for EACH combination of interactions
-                totalInteraction += coulombic;
+                totalInteraction += (coulombic + LJPotential);
             }
         }
     }
@@ -94,12 +113,14 @@ double ccCalculatePairwisePotential(struct CCSimulation *sim) {
 }
 
 
-double ccCalculateStandardMolarEnergy(double energy) {
-    return (energy / 1000) * (SIM_AVOGADRO_NUMBER);
+double ccCalculateStandardMolarEnergy(struct CCSimulation *sim) {
+    double totalEnergy = sim->lastPotentialEnergy;
+    double energyPerParticle = totalEnergy / sim->particleCount;
+    return (energyPerParticle / 1000) * (SIM_AVOGADRO_NUMBER);
 }
 
 static double getRandomNumber(int magnitude) {
-    return ((double)rand() / RAND_MAX) * magnitude;
+    return ((double)rand() / RAND_MAX) * (rand() % magnitude);
 }
 
 static void makeRandomMove(struct CCSimulation *sim, int *particleSelected, float *xBefore, float* yBefore, float* zBefore) {

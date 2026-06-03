@@ -4,7 +4,7 @@
 #define POSITION_COMPONENTS 3
 
 //SIMULATION PARAMETERS
-#define RANDOM_MAGNITUDE 2
+#define RANDOM_MAGNITUDE 15
 #define ROOM_TEMP 298
 
 //IMPORTANT PHYSICAL CONSTANTS
@@ -51,7 +51,7 @@ double ccCalculatePairwisePotential(struct CCSimulation * sim);
 void ccUpdateSimulation(struct CCSimulation *sim);
 
 //Takes an energy in joules and converts to kJ/mol
-double ccCalculateStandardMolarEnergy(double energy);
+double ccCalculateStandardMolarEnergy(struct CCSimulation *sim);
 
 //For later
 //void ccSetSimulationCellSize(float x, float y, float z);
